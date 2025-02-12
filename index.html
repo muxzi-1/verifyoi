@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verified - Inventory Management</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 600px;
+            width: 90%;
+        }
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 24px;
+        }
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #ffffff;
+        }
+        .message {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #9ca3af;
+            margin-bottom: 32px;
+        }
+        .button {
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 8px;
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+        .button:hover {
+            background-color: #1d4ed8;
+        }
+        .button.secondary {
+            background-color: transparent;
+            border: 1px solid #2563eb;
+        }
+        .button.secondary:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+        .countdown {
+            margin-top: 24px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        .stores {
+            margin-top: 32px;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+            .title {
+                font-size: 24px;
+            }
+            .message {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Success Icon (SVG) -->
+        <svg class="success-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="11" stroke="#22c55e" stroke-width="2"/>
+            <path d="M7 12L10 15L17 8" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+
+        <!-- App Logo -->
+        <img src="logo.png" alt="Inventory Management" class="logo">
+
+        <h1 class="title">Email Verified Successfully!</h1>
+        
+        <p class="message">
+            Your email has been verified. You can now return to the app and sign in with your email and password.
+        </p>
+
+        <!-- Open App Button -->
+        <a href="ttcjyp75://" class="button">Open App</a>
+        
+        <!-- Download Links -->
+        <div class="stores">
+            <a href="#" class="button secondary" id="android-store">
+                Get it on Google Play
+            </a>
+            <a href="#" class="button secondary" id="ios-store">
+                Download on App Store
+            </a>
+        </div>
+
+        <div class="countdown">
+            Opening app automatically in <span id="timer">120</span> seconds...
+        </div>
+    </div>
+
+    <script>
+        // Auto-open app after countdown
+        let timeLeft = 120;
+        const timerElement = document.getElementById('timer');
+        
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                window.location.href = 'ttcjyp75://';
+            }
+        }, 1000);
+
+        // Function to detect platform
+        function getMobileOperatingSystem() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            if (/android/i.test(userAgent)) {
+                return 'Android';
+            }
+            
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return 'iOS';
+            }
+            
+            return 'unknown';
+        }
+
+        // Hide irrelevant store button based on platform
+        const platform = getMobileOperatingSystem();
+        const androidButton = document.getElementById('android-store');
+        const iosButton = document.getElementById('ios-store');
+
+        if (platform === 'Android') {
+            iosButton.style.display = 'none';
+        } else if (platform === 'iOS') {
+            androidButton.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
