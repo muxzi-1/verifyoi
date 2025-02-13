@@ -129,12 +129,11 @@
     <script>
         // Get URL parameters
         const params = new URLSearchParams(window.location.search);
-        const token = params.get('token');
-        const type = params.get('type');
-        const redirectTo = params.get('redirect_to') || 'ttcjyp75://';
+        const code = params.get('code');
+        const final_redirect_url = params.get('final_redirect_url') || 'ttcjyp75://';
 
         // Update the Open App button href
-        document.getElementById('openAppButton').href = redirectTo;
+        document.getElementById('openAppButton').href = final_redirect_url + '?code=' + code;
 
         // Auto-open app after countdown
         let timeLeft = 5;
@@ -146,7 +145,7 @@
             
             if (timeLeft <= 0) {
                 clearInterval(countdown);
-                window.location.href = redirectTo;
+                window.location.href = final_redirect_url + '?code=' + code;
             }
         }, 1000);
 
