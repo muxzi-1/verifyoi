@@ -109,7 +109,7 @@
         </p>
 
         <!-- Open App Button -->
-        <a href="ttcjyp75://" class="button">Open App</a>
+        <a href="#" class="button" id="openAppButton">Open App</a>
         
         <!-- Download Links -->
         <div class="stores">
@@ -122,13 +122,22 @@
         </div>
 
         <div class="countdown">
-            Opening app automatically in <span id="timer">120</span> seconds...
+            Opening app automatically in <span id="timer">5</span> seconds...
         </div>
     </div>
 
     <script>
+        // Get URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+        const type = params.get('type');
+        const redirectTo = params.get('redirect_to') || 'ttcjyp75://';
+
+        // Update the Open App button href
+        document.getElementById('openAppButton').href = redirectTo;
+
         // Auto-open app after countdown
-        let timeLeft = 120;
+        let timeLeft = 5;
         const timerElement = document.getElementById('timer');
         
         const countdown = setInterval(() => {
@@ -137,7 +146,7 @@
             
             if (timeLeft <= 0) {
                 clearInterval(countdown);
-                window.location.href = 'ttcjyp75://';
+                window.location.href = redirectTo;
             }
         }, 1000);
 
