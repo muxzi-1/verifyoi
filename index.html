@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Verified - Inventory Management</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         body {
             margin: 0;
@@ -93,23 +94,41 @@
 </head>
 <body>
     <div class="container">
-        <!-- Success Icon (SVG) -->
-        <svg class="success-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="11" stroke="#22c55e" stroke-width="2"/>
-            <path d="M7 12L10 15L17 8" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <div id="loadingIcon">
+            <!-- Loading spinner SVG -->
+            <svg class="success-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="11" stroke="#6B7280" stroke-width="2"/>
+                <path class="spinner" d="M12 3C16.9706 3 21 7.02944 21 12" stroke="#2563EB" stroke-width="2"/>
+            </svg>
+        </div>
+        
+        <div id="successIcon" style="display: none;">
+            <!-- Success Icon SVG -->
+            <svg class="success-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="11" stroke="#22c55e" stroke-width="2"/>
+                <path d="M7 12L10 15L17 8" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+
+        <div id="errorIcon" style="display: none;">
+            <!-- Error Icon SVG -->
+            <svg class="success-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="11" stroke="#EF4444" stroke-width="2"/>
+                <path d="M8 8L16 16M8 16L16 8" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
 
         <!-- App Logo -->
         <img src="logo.png" alt="Inventory Management" class="logo">
 
-        <h1 class="title">Email Verified Successfully!</h1>
+        <h1 class="title">Verifying Email...</h1>
         
         <p class="message">
-            Your email has been verified. You can now return to the app and sign in with your email and password.
+            Please wait while we verify your email address...
         </p>
 
         <!-- Open App Button -->
-        <a href="#" class="button" id="openAppButton">Open App</a>
+        <a href="#" class="button" id="openAppButton" style="display: none;">Open App</a>
         
         <!-- Download Links -->
         <div class="stores">
@@ -121,33 +140,87 @@
             </a>
         </div>
 
-        <div class="countdown">
+        <div class="countdown" style="display: none;">
             Opening app automatically in <span id="timer">5</span> seconds...
         </div>
     </div>
 
     <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://pctqxysohckoryopgdmq.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjdHF4eXNvaGNrb3J5b3BnZG1xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkyNDg5NTEsImV4cCI6MjA1NDgyNDk1MX0.Q3s4VJ7jN9VG7TMU2kUUzLQ9AWv0Ipvn86syOhj1hDk';
+        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
         // Get URL parameters
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
         const final_redirect_url = params.get('final_redirect_url') || 'ttcjyp75://';
 
-        // Update the Open App button href
-        document.getElementById('openAppButton').href = final_redirect_url + '?code=' + code;
+        async function verifyEmail() {
+            try {
+                // First verify with Supabase
+                const { error } = await supabase.auth.verifyOtp({
+                    token_hash: code,
+                    type: 'email'
+                });
 
-        // Auto-open app after countdown
-        let timeLeft = 5;
-        const timerElement = document.getElementById('timer');
-        
-        const countdown = setInterval(() => {
-            timeLeft--;
-            timerElement.textContent = timeLeft;
-            
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                window.location.href = final_redirect_url + '?code=' + code;
+                if (error) {
+                    showError(error.message);
+                    return;
+                }
+
+                showSuccess();
+            } catch (error) {
+                console.error('Verification error:', error);
+                showError('An error occurred during verification. Please try again.');
             }
-        }, 1000);
+        }
+
+        function showSuccess() {
+            // Update UI elements
+            document.getElementById('loadingIcon').style.display = 'none';
+            document.getElementById('successIcon').style.display = 'block';
+            document.querySelector('.title').textContent = 'Email Verified Successfully!';
+            document.querySelector('.message').textContent = 'Your email has been verified. You can now return to the app and sign in with your email and password.';
+            
+            // Show and update the Open App button
+            const successUrl = final_redirect_url + '?verification=success';
+            const openAppButton = document.getElementById('openAppButton');
+            openAppButton.href = successUrl;
+            openAppButton.style.display = 'inline-block';
+
+            // Show and start countdown
+            document.querySelector('.countdown').style.display = 'block';
+            startCountdown(successUrl);
+        }
+
+        function showError(message) {
+            // Update UI elements
+            document.getElementById('loadingIcon').style.display = 'none';
+            document.getElementById('errorIcon').style.display = 'block';
+            document.querySelector('.title').textContent = 'Verification Failed';
+            document.querySelector('.title').style.color = '#EF4444';
+            document.querySelector('.message').textContent = message;
+            document.querySelector('.message').style.color = '#EF4444';
+        }
+
+        function startCountdown(redirectUrl) {
+            let timeLeft = 5;
+            const timerElement = document.getElementById('timer');
+            
+            const countdown = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    window.location.href = redirectUrl;
+                }
+            }, 1000);
+        }
+
+        // Start verification process
+        verifyEmail();
 
         // Function to detect platform
         function getMobileOperatingSystem() {
@@ -175,5 +248,16 @@
             androidButton.style.display = 'none';
         }
     </script>
+
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            transform-origin: 12px 12px;
+            animation: spin 1s linear infinite;
+        }
+    </style>
 </body>
 </html>
